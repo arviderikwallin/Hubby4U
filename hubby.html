@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubby4U | Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            background-color: #fff0f3;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            margin-top: 20px;
+            /* Reduced since logo is in the corner */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1 {
+            color: #ff4d6d;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #ff4d6d;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        select {
+            width: 95%;
+            padding: 10px;
+            border: 2px solid #ffccd5;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            width: 100%;
+            background-color: #ffe5ec;
+            border-radius: 20px;
+            margin: 20px 0;
+            height: 25px;
+            overflow: hidden;
+            border: 2px solid #ffccd5;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #ff4d6d;
+            transition: width 0.1s;
+        }
+
+        #loading-text {
+            font-style: italic;
+            color: #ff4d6d;
+            min-height: 50px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        #sushiRange {
+            width: 100%;
+            accent-color: #ff4d6d;
+        }
+
+        #sushiValue {
+            font-weight: bold;
+            color: #ff4d6d;
+            font-size: 1.2rem;
+        }
+
+        #sushiFunny {
+            font-style: italic;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #ff758f;
+            transform: translateY(-2px);
+        }
+
+        .image-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .image-row img {
+            width: 140px;
+            height: 140px;
+            border-radius: 15px;
+            border: 4px solid #ff4d6d;
+            object-fit: cover;
+        }
+
+        .letter {
+            text-align: left;
+            line-height: 1.6;
+            font-size: 15px;
+            background: #fff5f7;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #ff4d6d;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .scroll-box {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* This ensures a clean, uniform grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            /* Forces exactly 3 columns */
+            gap: 10px;
+            margin: 20px 0;
+            justify-items: center;
+        }
+
+        .image-grid img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            /* FORCES the image to be a perfect square */
+            object-fit: cover;
+            /* Crops the image so it doesn't look stretched */
+            border-radius: 12px;
+            border: 3px solid #ff4d6d;
+            transition: transform 0.3s ease;
+        }
+
+        .image-grid img:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .image-grid img:hover {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        .logo-container {
+            position: fixed;
+            top: 15px;
+            /* Adjust this to move it up or down */
+            left: 15px;
+            z-index: 1000;
+        }
+
+        .main-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            /* Changed from 'cover' to 'contain' to ensure the whole logo shows */
+            /* Removed background, border, and border-radius */
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: quirkyWiggle 4s ease-in-out infinite;
+
+            /* Optional: This shadow will now follow the shape of the logo itself 
+       if the image has a transparent background */
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+        }
+
+        /* Hover effect: No more white ring glow, just a nice scale and spin */
+        .main-logo:hover {
+            transform: scale(1.1) rotate(15deg);
+            filter: drop-shadow(0 0 10px rgba(255, 77, 109, 0.4));
+        }
+
+        @keyframes quirkyWiggle {
+
+            0%,
+            100% {
+                transform: rotate(-5deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(5deg) scale(1.05);
+            }
+        }
+
+        #music-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+        }
+
+        .music-text {
+            font-family: 'Segoe UI', sans-serif;
+            color: #ff4d6d;
+            font-weight: bold;
+            font-style: italic;
+            text-shadow: 1px 1px 2px white;
+            font-size: 1.1rem;
+        }
+
+        .floating-btn {
+            background-color: #ffd166;
+            border: 3px solid #fff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1) rotate(-10deg);
+            background-color: #ff758f;
+        }
+
+        /* Animation for the text to grab her attention */
+        .music-text {
+            animation: nudge 2s ease-in-out infinite;
+        }
+
+        @keyframes nudge {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(-5px);
+            }
+        }
+
+        .yt-btn {
+            background-color: #ff0000;
+            /* YouTube Red */
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .yt-btn:hover {
+            background-color: #cc0000;
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(255, 0, 0, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="logo-container">
+        <img src="hubby4ulogo.png" alt="Hubby4U Logo" class="main-logo" title="Ricky dicky the hubby finder"
+            onclick="confetti({ particleCount: 50, origin: { x: 0, y: 0 } })">
+    </div>
+
+    <div id="screen1" class="card">
+        <h1>Hubby4U</h1>
+        <div class="scroll-box">
+            <div class="form-group">
+                <label>Enter your name:</label>
+                <input type="text" id="nameIn" placeholder="Your name...">
+            </div>
+            <div class="form-group">
+                <label>Country of origin:</label>
+                <input type="text" id="countryIn" placeholder="Country of origin...">
+            </div>
+            <div class="form-group">
+                <label>Favorite color:</label>
+                <input type="text" id="colorIn" placeholder="Favorite color...">
+            </div>
+            <div class="form-group">
+                <label>Favorite TV show:</label>
+                <input type="text" id="showIn" placeholder="Favorite TV show...">
+            </div>
+            <div class="form-group">
+                <label>Are you a witch?</label>
+                <select id="witchIn">
+                    <option>Yes</option>
+                    <option>No</option>
+                    <option>Maybeeeee....</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Do u think birbs are cool?</label>
+                <select id="birbIn">
+                    <option>Yes</option>
+                    <option>CIA CONTROLLED DRONES</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Would u beat ur hubby in tennis?</label>
+                <select id="tennisIn">
+                    <option>Yes (I'll beat his ass)</option>
+                    <option>No (I'll beat his ass still)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ワンピースってウォーキング・デッドより面白いの？</label>
+                <select>
+                    <option>Yes</option>
+                    <option>Yes^2</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Do you think Thranduil is a diva?</label>
+                <select id="thranduilIn">
+                    <option>YESSSS!!</option>
+                    <option>no (wrong)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ought thy lord husband don his plate and mail at least once sennight?</label>
+                <select id="armorIn">
+                    <option>Yea, verily! For a knight must ever be ready for the fray</option>
+                    <option>Nay, for the clatter of his greaves would wake the babe and frighten the hounds.</option>
+                </select>
+            </div>
+            <div class="slider-container">
+                <label>How much do you love sushi?</label>
+                <input type="range" id="sushiRange" min="0" max="1000000" value="50" oninput="updateSushi(this.value)">
+                <div id="sushiValue">50%</div>
+                <div id="sushiFunny">Ugh kebab is better than sushi...</div>
+            </div>
+            <button onclick="startLoading()">Press to find your Hubby</button>
+        </div>
+    </div>
+
+    <div id="screen-loading" class="card hidden">
+        <h1>Processing Hubby material...</h1>
+        <div class="progress-container">
+            <div id="p-bar" class="progress-bar"></div>
+        </div>
+        <p id="loading-text">Initializing AI Boar-detection...</p>
+    </div>
+
+    <!-- SCREEN 2: THE REVEAL -->
+    <div id="screen2" class="card hidden">
+        <h1>100% MATCH!</h1>
+        <p>You are 100% compatible with a <b>wild boar hubby</b>.</p>
+        <p>They are super rare... Only one remains in the world. He lives 2600 km away and his name is <b>Arvid
+                Wallin</b>.</p>
+
+        <div class="image-grid">
+            <!-- Add all your boar and Arvid pics here! -->
+            <img src="arvid1.jpg" alt="Arvid 1">
+            <img src="boar.jpg" alt="Boar 1">
+            <img src="arvid2.jpg" alt="Arvid 2"> <!-- Make sure these files exist in your folder -->
+        </div>
+
+        <h3>Do you want to cast a love potion on him?</h3>
+        <button onclick="finalStep()">YES</button>
+        <button onclick="finalStep()">YES</button>
+    </div>
+
+    <div id="screen3" class="card hidden">
+        <h1>Congrats! 🐗💍</h1>
+        <p>You now have a wild boar hubby! He left u a message:</p>
+        <div class="letter">
+            Haiiiiiii Paui, it's miiiiii Arvi from the future, I wanna telli u some secrets from the future so shhhhh.
+            <br><br>
+
+            So six years from now, you and I got married in your hometown in Italy. Both of our families and all of our
+            friends came. I even invited my gymbros. You were against it since we barely know each other but they ended
+            up being the ones who cried the most. You looked so beautiful that day, baby.
+            <br><br>
+
+            After the wedding I gave your parents the best magnets from Sweden and I gave your grandpa an amazing
+            swedish watch. You and I paui, went out to devour some charcuterie and now a few years later we have five
+            smol mini versions of us two. ALSO INVEST ALL YOUR MONEY IN IKEA BECAUSE THEY ARE GONNA TAKE OVER THE WORLD AHHHHH
+            <br><br>
+
+            Babi, I lovi you so much. I just wanti us to be happi together and I want to give u the best life ever. My
+            heart chose you baby and you are all I want. Jag älskar dig så mycket.
+        </div>
+
+        <!-- FLOATING MUSIC CONTROL -->
+        <div id="music-container" class="hidden">
+            <span class="music-text">SUPRISE SONG</span>
+            <button onclick="playChiquitita()" id="musicBtn" class="floating-btn">
+                🎵
+            </button>
+        </div>
+
+        <!-- THE AUDIO ELEMENT -->
+        <audio id="chiquititaAudio" src="chiquitita.mp3"></audio>
+
+
+        <div style="margin-top: 30px; border-top: 2px dashed #ffccd5; padding-top: 20px;">
+            <p style="color: #ff4d6d; font-weight: bold;">Last thing beibi...</p>
+            <button onclick="goToYouTube()" class="yt-btn">
+                Press this hehe
+            </button>
+        </div>
+
+        <script>
+            function updateSushi(val) {
+                document.getElementById('sushiValue').innerText = val + "%";
+                let msg = "";
+                if (val < 1000) { msg = "Oh come on... I know u like sushi more than that"; }
+                else if (val < 500000) { msg = "Okay dawg chill"; }
+                else if (val < 999999) { msg = "CHILL UR HUSBAND IS NOT A SUSHI ROLL"; }
+                else { msg = "OKAY FINE UR HUSBAND MIGHT ACTUALLY BE A SUSHI ROLL"; }
+                document.getElementById('sushiFunny').innerText = msg;
+            }
+
+            function startLoading() {
+                document.getElementById('screen1').classList.add('hidden');
+                document.getElementById('screen-loading').classList.remove('hidden');
+
+                const name = document.getElementById('nameIn').value || "Paui";
+                const show = document.getElementById('showIn').value || "TV";
+                const color = document.getElementById('colorIn').value || "något";
+                const sushi = document.getElementById('sushiRange').value;
+
+                const messages = [
+                    "SCANNING FOR HUSBAND...",
+                    `Wait is ${name} really a witch...`,
+                    `OKIS OKIS ${show} IS REALLY AMAZING...`,
+                    `Are there boars where ${name} lives...`,
+                    `Ugh ${color} is such a diva color...`,
+                    `WOW ${sushi}%?... DO YOU WANT TO TURN INTO A SUSHI ROLL OR WHAT...?`,
+                    "Is ur hubby Mongolian?",
+                    "Smaug is that you?",
+                    "Checking how many legolas we can adopt...",
+                    "You have a whole ass hubby waiting for u!!!!!!!"
+                ];
+
+                let bar = document.getElementById('p-bar');
+                let text = document.getElementById('loading-text');
+                let width = 0;
+                let msgIndex = 0;
+
+                let interval = setInterval(() => {
+                    if (width >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            document.getElementById('screen-loading').classList.add('hidden');
+                            document.getElementById('screen2').classList.remove('hidden');
+                            confetti({ particleCount: 150, spread: 70 });
+                        }, 1000);
+                    } else {
+                        width++;
+                        bar.style.width = width + '%';
+
+                        // Byt meddelande var 10:e procent
+                        if (width % 10 === 0 && msgIndex < messages.length) {
+                            text.innerText = messages[msgIndex];
+                            msgIndex++;
+                        }
+                    }
+                }, 80);
+            }
+
+
+            function finalStep() {
+                Swal.fire({
+                    title: 'Casting Love Potion...',
+                    text: 'HEY DID U JUST PUT SOY SAUCE ON ARVI?',
+                    imageUrl: 'grimes.gif',
+                    imageWidth: 300,
+                    timer: 3000,
+                    showConfirmButton: false
+                }).then(() => {
+                    document.getElementById('screen2').classList.add('hidden');
+                    document.getElementById('screen3').classList.remove('hidden');
+
+                    // SHOW THE MUSIC BUTTON NOW
+                    document.getElementById('music-container').classList.remove('hidden');
+
+                    confetti({ particleCount: 200, spread: 160, colors: ['#ff4d6d', '#ffffff'] });
+                });
+            }
+
+            function playChiquitita() {
+                const audio = document.getElementById('chiquititaAudio');
+                const btn = document.getElementById('musicBtn');
+
+                if (audio.paused) {
+                    audio.play();
+                    btn.innerText = "⏸";
+                    btn.style.backgroundColor = "#ff758f";
+                } else {
+                    audio.pause();
+                    btn.innerText = "🎵";
+                    btn.style.backgroundColor = "#ffd166";
+                }
+            }
+
+            function goToYouTube() {
+                // Replace the link below with your actual YouTube video link
+                const youtubeUrl = "https://www.youtube.com/watch?v=IZgomndGuJ4";
+
+                // Opens in a new tab so she doesn't lose the letter page
+                window.open(youtubeUrl, '_blank');
+            }
+        </script>
+</body>
+
+</html>
